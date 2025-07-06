@@ -49,45 +49,46 @@ export const wasAlertSent = (notificationId) => {
     return history.includes(notificationId);
 };
 
-// parseSpanishDate helper function 
+// Helper function to convert localized month names to numbers
+// Expected monthName format from formatDate is like "may.", "jun.", etc.
 const getMonthNumber = (monthName) => {
-    if (!monthName) return '01';
-    const months = {
-        'ene': '01', 'feb': '02', 'mar': '03', 'abr': '04',
-        'may': '05', 'jun': '06', 'jul': '07', 'ago': '08',
-        'sep': '09', 'oct': '10', 'nov': '11', 'dic': '12'
-    };
-    return months[monthName.toLowerCase().trim()] || '01';
+    // Remove the dot if present and convert to lowercase for comparison
+    const cleanMonthName = monthName.replace('.', '').toLowerCase().trim();
+    const months = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+    const index = months.indexOf(cleanMonthName);
+    if (index > -1) {
+        return (index + 1).toString().padStart(2, '0'); // Return 0-indexed month number + 1, padded
+    }
+    return null; // Return null if month name is not found
 };
 
 export const parseSpanishDate = (dateStr) => {
     if (!dateStr || typeof dateStr !== 'string') return null;
     
     try {
-        let parts;
-        // Try format with "de": "15 de ene de 2024"
-        if (dateStr.includes(' de ')) {
-            parts = dateStr.split(' de ');
-            if (parts.length === 3) {
-                const day = parts[0].padStart(2, '0');
-                const month = getMonthNumber(parts[1]);
-                const year = parts[2];
-                return new Date(`${year}-${month}-${day}`);
-            }
-        }
-        // Try format without "de": "15 ene 2024"
-        parts = dateStr.split(' ');
+        // Expected format from formatDate: "DD MMM. YYYY" (e.g., "15 may. 2024")
+        const parts = dateStr.split(' ');
         if (parts.length === 3) {
             const day = parts[0].padStart(2, '0');
-            const month = getMonthNumber(parts[1]);
+            const monthNumber = getMonthNumber(parts[1]);
             const year = parts[2];
-            return new Date(`${year}-${month}-${day}`);
+
+            if (monthNumber) { // Check if month was successfully mapped
+                // Create Date object in YYYY-MM-DD format to avoid locale issues
+                return new Date(`${year}-${monthNumber}-${day}T00:00:00`); 
+            }
         }
         
-        // Fallback: try to parse as is (e.g., "YYYY-MM-DD")
-        return new Date(dateStr);
+        // Fallback for standard ISO or other universally parsable formats (e.g., "YYYY-MM-DD")
+        const genericDate = new Date(dateStr);
+        if (!isNaN(genericDate.getTime())) { // Check if it's a valid date
+            return genericDate;
+        }
+
+        console.warn('Could not parse date with any known format:', dateStr);
+        return null;
     } catch (error) {
-        console.warn('Could not parse date:', dateStr, error);
+        console.warn('Error during date parsing:', dateStr, error);
         return null;
     }
 };
