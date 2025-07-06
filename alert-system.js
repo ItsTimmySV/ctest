@@ -31,6 +31,7 @@ export const getNotificationsForCards = (cards) => {
             const daysUntilPayment = Math.ceil((paymentDueDate - today) / (1000 * 60 * 60 * 24));
             
             // Check if the payment is due in 'daysAdvance' days and hasn't been notified yet
+            // Also ensure paymentForPeriod is greater than 0, meaning there's a balance to pay.
             if (daysUntilPayment === daysAdvance && details.paymentForPeriod > 0) {
                 // Ensure the alias is used, and fallback to bank if alias is empty for the title
                 const cardDisplayName = card.alias ? card.alias : card.bank;

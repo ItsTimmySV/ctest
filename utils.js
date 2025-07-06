@@ -9,7 +9,7 @@ export const saveCards = (cards) => localStorage.setItem('cards', JSON.stringify
 
 export const getCards = () => JSON.parse(localStorage.getItem('cards')) || [];
 
-// NEW: Utility to set up modal close listeners
+// Utility to set up modal close listeners
 export const setupModalClose = (modalElement) => {
     if (!modalElement) return; // Add null check
     modalElement.addEventListener('click', (e) => {
@@ -19,7 +19,7 @@ export const setupModalClose = (modalElement) => {
     });
 };
 
-// NEW: Alert-related utilities
+// Alert-related utilities
 export const saveAlertSettings = (settings) => localStorage.setItem('alertSettings', JSON.stringify(settings));
 
 export const getAlertSettings = () => {
